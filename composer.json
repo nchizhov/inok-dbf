@@ -1,0 +1,25 @@
+{
+  "name": "inok/dbf",
+  "description": "Package for reading DBASE-files (FoxPro) wuth/without MEMO-fields",
+  "keywords": ["dbf", "memo", "foxpro", "dbase"],
+  "homepage": "http://blog.kgd.in",
+  "type": "library",
+  "license": "MIT",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Chizhov Nikolay",
+      "email": "admin@kgd.in",
+      "homepage": "http://blog.kgd.in",
+      "role": "System Administrator"
+    }
+  ],
+  "require": {
+    "php": ">=5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "Inok\\Dbf": "src"
+    }
+  }
+}

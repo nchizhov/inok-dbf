@@ -1,6 +1,6 @@
 {
   "name": "inok/dbf",
-  "description": "Package for reading DBASE-files (FoxPro) wuth/without MEMO-fields",
+  "description": "Package for reading DBASE-files (FoxPro) with/without MEMO-fields",
   "keywords": ["dbf", "memo", "foxpro", "dbase"],
   "homepage": "http://blog.kgd.in",
   "type": "library",

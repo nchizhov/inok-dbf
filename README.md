@@ -1,7 +1,7 @@
 ## DBF-file Reader Class
 
 ### Description
-This group of classes (**Table**, **Records**, **Memo** in namespace **iDBF**) needs for reading DBF-files (structure, records) with/without MEMO-fields.
+This group of classes (**Table**, **Records**, **Memo** in namespace **Inok\Dbf**) needs for reading DBF-files (structure, records) with/without MEMO-fields.
 
 ### Classes descriptions
 #### Table
@@ -15,7 +15,7 @@ $table = new \Inok\Dbf\Table(/path/to/dbf/file);
 ##### Methods:
    * ```$table->getHeaders()``` - return array of DBF-file headers
    * ```$table->getColumns()``` - return array of DBF-file columns
-   * ```$table->getData()``` - return resource to DBF-file body (required for **\iDBF\Records**)
+   * ```$table->getData()``` - return resource to DBF-file body (required for **Inok\Dbf\Records**)
    * ```$table->error``` - return boolean true if in DBF-file errors in headers or columns
    * ```$table->error_info``` - returns error description or **null** - if no errors
    * ```$table->close()``` - close DBF-file (also closing on destruct class)
@@ -36,7 +36,7 @@ May read records of: FoxBASE, dBASE III, dBASE IV, dBASE 5, dBASE 7, FoxPro, Fox
 ```
 $records = new \Inok\Dbf\Records($data, $encode, $headers, $columns);
 ```
-* **$data** - Instance of Table class or DBF-file resource from \iDBF\Table getData()
+* **$data** - Instance of Table class or DBF-file resource from Inok\Dbf\Table getData()
 * **$encode** - iconv **Memo, Character** fields to selected character (default: **utf8**)
 * **$headers** - DBF-file headers array or null if $data is instance of Table class (default: null)
 * **$columns** - DBF-file columns array or null if $data is instance of Table class (default: null)

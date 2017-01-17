@@ -49,7 +49,7 @@ class Records {
     $record["deleted"] = (unpack("C", $data[0])[1] == 42);
     $pos = 1;
     foreach ($this->columns as $column) {
-      $sub_data = trim(substr($data, $pos, $column["length"]));
+      $sub_data = (in_array($column["type"], ["M", "P", "G"])) ? substr($data, $pos, $column["length"]) : trim(substr($data, $pos, $column["length"]));
       switch($column["type"]) {
         case "F":
         case "N":
@@ -68,11 +68,11 @@ class Records {
         case "M":
         case "P":
         case "G":
-          if ($sub_data == "") {
+          if (trim($sub_data) == "") {
             $record[$column["name"]] = null;
           }
           else {
-            $sub_data = ($this->v_fox) ? ord($sub_data) : (int)$sub_data;
+            $sub_data = ($this->v_fox) ? unpack("L", $sub_data)[1] : (int)$sub_data;
             $record[$column["name"]] = $this->getMemo($sub_data, ($column["type"] == "M"));
           }
           break;
@@ -89,6 +89,6 @@ class Records {
   }
 
   private function convertChar($data) {
-    return iconv(str_replace("\r\n", "\n", $this->headers["charset_name"]), $this->encode, $data);
+    return iconv($this->headers["charset_name"], $this->encode, str_replace("\r\n", "\n", $data));
   }
 }

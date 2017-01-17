@@ -69,7 +69,7 @@ class Records {
         case "P":
         case "G":
           if (trim($sub_data) == "") {
-            $record[$column["name"]] = null;
+            $record[$column["name"]] = "";
           }
           else {
             $sub_data = ($this->v_fox) ? unpack("L", $sub_data)[1] : (int)$sub_data;

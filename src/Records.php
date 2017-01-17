@@ -12,9 +12,11 @@ class Records {
   private $fp, $headers, $columns, $memo, $encode;
   private $records = 0;
 
+  private $v_fox_versions = [48, 49];
+  private $v_fox = false;
   private $logicals = ['t', 'y', 'д'];
 
-  public function __construct($data, $encode = "utf8", $headers = null, $columns = null) {
+  public function __construct($data, $encode = "utf-8", $headers = null, $columns = null) {
     if ($data instanceof Table) {
       $this->headers = $data->getHeaders();
       $this->columns = $data->getColumns();
@@ -32,6 +34,7 @@ class Records {
     if ($this->headers["memo"] && !is_null($this->headers["memo_file"])) {
       $this->memo = new Memo($this->headers["memo_file"]);
     }
+    $this->v_fox = in_array($this->headers["version"], $this->v_fox_versions);
   }
 
   public function nextRecord() {
@@ -63,11 +66,15 @@ class Records {
           $record[$column["name"]] = $this->convertChar($sub_data);
           break;
         case "M":
-          $record[$column["name"]] = ($sub_data != "") ? $this->getMemo((int) $sub_data) : "";
-          break;
         case "P":
         case "G":
-          $record[$column["name"]] = ($sub_data != "") ? $this->getMemo((int) $sub_data, false) : null;
+          if ($sub_data == "") {
+            $record[$column["name"]] = null;
+          }
+          else {
+            $sub_data = ($this->v_fox) ? ord($sub_data) : (int)$sub_data;
+            $record[$column["name"]] = $this->getMemo($sub_data, ($column["type"] == "M"));
+          }
           break;
       }
       $pos += $column["length"];

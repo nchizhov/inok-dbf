@@ -80,8 +80,13 @@ $memo = new \Inok\Dbf\Memo(/path/to/dbf/memo/file);
 * **type** - column type (one char)
 * **length** - column length
 * **decimal** - if not *0* - decimal part of number
-* **mdx_flag** - MDX-flag on column
-* **auto_increment** - next auto increment value (only for *dBASE 7*)
+* **mdx_flag** - MDX-flag on column (except *Visual FoxPro*)
+* **auto_increment** - next auto increment value (only for *dBASE 7*, *Visual FoxPro*)
+* **system** - column is system (only for *Visual FoxPro*)
+* **has_null** - column can story null values (only for *Visual FoxPro*)
+* **binary** - column for *CHAR* and *MEMO* only (only for *Visual FoxPro*)
+* **auto_increment_next** - next value for auto increment (only for *Visual FoxPro*)
+* **auto_increment_step** - step value for auto increment (only for *Visual FoxPro*)
 
 ##### MEMO-file header array:
 * **freeblock_position** - position of next free block of MEMO-file

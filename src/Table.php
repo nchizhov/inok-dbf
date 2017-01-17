@@ -37,7 +37,7 @@ class Table {
     "versions" => [131, 139, 140, 203, 229, 235, 245, 251],
     "formats" => [
       "dbt" => [131, 139, 140, 203, 235, 251],
-      "fpt" => [245],
+      "fpt" => [245, 48, 49],
       "smt" => [229]
     ]
   ];
@@ -57,7 +57,7 @@ class Table {
     136 => 857,    150 => 10007,  151 => 10029,   152 => 10006,    200 => 1250,
     201 => 1251,   202 => 1254,   203 => 1253,    204 => 1257
   ];
-  private $dbase7 = false;
+  private $dbase7 = false, $v_foxpro = false;
 
   public function __construct($dbPath){
     $this->db = $dbPath;
@@ -127,20 +127,28 @@ class Table {
     else {
       $this->headers["charset_name"] = "cp".$this->charsets[$this->headers["charset"]];
 
-      $this->headers["memo"] = in_array($this->headers["version"], $this->memo["versions"]);
-      if ($this->headers["memo"]) {
-        $this->headers["memo_file"] = ($mfile = $this->getMemoFile($file["dirname"]."/".$file["filename"])) ? $mfile : null;
-      }
-
-      $this->dbase7= (in_array("dBASE 7", $this->versions[$this->headers["version"]]));
-      $this->headers["version_name"] =
-        implode(", ", $this->versions[$this->headers["version"]])." ".($this->headers["memo"] ? "with" : "without")." memo-fields";
-      if ($this->dbase7) {
+      if (in_array("dBASE 7", $this->versions[$this->headers["version"]])) {
+        $this->dbase7 = true;
         $this->headers["columns"] = ($this->headers["header_length"] - 68) / 48;
+      }
+      elseif (in_array("Visual FoxPro", $this->versions[$this->headers["version"]])) {
+        $this->v_foxpro = true;
+        $this->headers["memo"] = (in_array($this->headers["mdx_flag"], [2, 3, 6, 7]));
+        $this->headers["columns"] = ($this->headers["header_length"] - 296) / 32;
       }
       else {
         $this->headers["columns"] = ($this->headers["header_length"] - 33) / 32;
       }
+
+      if (!isset($this->headers["memo"])) {
+        $this->headers["memo"] = in_array($this->headers["version"], $this->memo["versions"]);
+      }
+      if ($this->headers["memo"]) {
+        $this->headers["memo_file"] = ($mfile = $this->getMemoFile($file["dirname"]."/".$file["filename"])) ? $mfile : null;
+      }
+
+      $this->headers["version_name"] =
+        implode(", ", $this->versions[$this->headers["version"]])." ".($this->headers["memo"] ? "with" : "without")." memo-fields";
       unset($this->headers["checks"], $this->headers["header_length"]);
     }
   }
@@ -167,9 +175,22 @@ class Table {
             "name" => strtolower(trim(substr($data, 0, 11))),
             "type" => $data[11],
             "length" => unpack("C", $data[16])[1],
-            "decimal" => unpack("C", $data[17])[1],
-            "mdx_flag" => unpack("C", $data[31])[1]
+            "decimal" => unpack("C", $data[17])[1]
           ];
+          if ($this->v_foxpro) {
+            $this->columns[$i]["flag"] = unpack("C", $data[18])[1];
+            $this->columns[$i]["system"] = ($this->columns[$i]["flag"] == 1);
+            $this->columns[$i]["has_null"] = in_array($this->columns[$i]["flag"], [2, 6]);
+            $this->columns[$i]["binary"] = in_array($this->columns[$i]["flag"], [4, 6]);
+            $this->columns[$i]["auto_increment"] = ($this->columns[$i]["flag"] == 12);
+            if ($this->columns[$i]["auto_increment"]) {
+              $this->columns[$i]["auto_increment_next"] = unpack("L", substr($data, 19, 4))[1];
+              $this->columns[$i]["auto_increment_step"] = unpack("C", $data[23])[1];
+            }
+          }
+          else {
+            $this->columns[$i]["mdx_flag"] = unpack("C", $data[31])[1];
+          }
         }
         if ($this->columns[$i] == "C") {
           $this->columns[$i]["length"] = unpack("S", substr($data, ($this->dbase7) ? 33 : 16, 2));
@@ -181,6 +202,9 @@ class Table {
     if ($terminal_byte != 13) {
       $this->error = true;
       $this->error_info = "Not correct DBF file by columns";
+    }
+    if ($this->v_foxpro) {
+      fread($this->fp, 263);
     }
   }
 

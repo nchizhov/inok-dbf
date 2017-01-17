@@ -13,7 +13,7 @@ class Memo {
 
   private $db, $fp;
   private $signature = [
-    0 => "template",
+    0 => "template|picture",
     1 => "text"
   ];
 
@@ -57,7 +57,7 @@ class Memo {
   private function readHeaders() {
     $data = fread($this->fp, 512);
     $this->headers = [
-      "freeblock_position" => unpack("L", substr($data, 0, 4))[1],
+      "freeblock_position" => unpack("N", substr($data, 0, 4))[1],
       "block_size" => unpack("n", substr($data, 6, 2))[1]
     ];
   }

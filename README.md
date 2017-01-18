@@ -9,8 +9,9 @@ May read headers of: FoxBASE, dBASE III, dBASE IV, dBASE 5, dBASE 7 (*partial*),
 
 ##### Using: 
 ```
-$table = new \Inok\Dbf\Table(/path/to/dbf/file);
+$table = new \Inok\Dbf\Table(/path/to/dbf/file, $charset);
 ```
+where `$charset` only using, when charset in dbf-file not defined (default charset: **866**)
 
 ##### Methods:
    * ```$table->getHeaders()``` - return array of DBF-file headers

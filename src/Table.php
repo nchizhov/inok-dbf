@@ -43,6 +43,7 @@ class Table {
   ];
 
   private $charsets = [
+    0   => 866, //If charset not defined
     1   => 437,    2   => 850,    3   => 1252,    4   => 10000,    8   => 865,
     9   => 437,    10  => 850,    11  => 437,     13  => 437,      14  => 850,
     15  => 437,    16  => 850,    17  => 437,     18  => 850,      19  => 932,
@@ -59,8 +60,14 @@ class Table {
   ];
   private $dbase7 = false, $v_foxpro = false;
 
-  public function __construct($dbPath){
+  public function __construct($dbPath, $charset = null){
     $this->db = $dbPath;
+    if (!is_null($charset)) {
+      if (!is_numeric($charset)) {
+        throw new \Exception("Set not correct charset. Allows only digits.");
+      }
+      $this->charsets[0] = $charset;
+    }
     $this->open();
   }
 

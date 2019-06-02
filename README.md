@@ -24,14 +24,17 @@ where `$charset` only using, when charset in dbf-file not defined (default chars
 #### Records
 May read records of: FoxBASE, dBASE III, dBASE IV, dBASE 5, dBASE 7, FoxPro, FoxBASE+, Visual FoxPro file records. Now implements column types:
 * **C** - Character
-* **D** - Date (if empty converts to null)
+* **D** - Date as string in format 'YYYYMMDD' (if empty converts to null)
 * **F** - Float
 * **G** - General (OLE)
-* **L** - Logical ('t', 'y', 'д' - converts to 1, all others to 0)
+* **L** - Logical ('t', 'y', 'д' - converts to 1, '?' - converts to null, all others to 0)
 * **M** - Memo 
 * **N** - Numeric
 * **P** - Picture
-* **T** - DateTime  (if empty converts to null) (*partial implemented*)
+* **T** - DateTime as string in format 'YYYYMMDDHHIISS' (if empty converts to null)
+* **I** - Integer
+* **Y** - Currency
+* **0** - NullFlags as integer
 
 ##### Using: 
 ```
@@ -91,11 +94,12 @@ $memo = new \Inok\Dbf\Memo(/path/to/dbf/memo/file);
 
 ##### MEMO-file header array:
 * **freeblock_position** - position of next free block of MEMO-file
-* **block_size** - MEMO-file block size
+* **block_size** - MEMO-file block size (*if exists*)
+* **dbf-file** - DBF-file name (*if exists*)
 
 ##### MEMO-record header array:
-* **signature** - type of MEMO-record: text or template
-* **length** - size of MEMO-record
+* **signature** - type of MEMO-record: text or template (*if exists*)
+* **length** - size of MEMO-record (*if exists*)
 * **text** - text of MEMO-record
 
 ### License

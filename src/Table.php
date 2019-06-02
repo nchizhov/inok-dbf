@@ -3,7 +3,7 @@
  * DBF-file Structure Reader
  *
  * Author: Chizhov Nikolay <admin@kgd.in>
- * (c) 2016 CIOB "Inok"
+ * (c) 2019 CIOB "Inok"
  ********************************************/
 
 namespace Inok\Dbf;
@@ -22,6 +22,7 @@ class Table {
     4   => ["dBASE 7"],
     48  => ["Visual FoxPro"],
     49  => ["Visual FoxPro"],
+    50  => ["Visual FoxPro"],
     67  => ["dBASE IV", "dBASE 5"],
     99  => ["dBASE IV", "dBASE 5"],
     131 => ["dBASE III", "FoxBASE+", "FoxPro"],
@@ -37,7 +38,7 @@ class Table {
     "versions" => [131, 139, 140, 203, 229, 235, 245, 251],
     "formats" => [
       "dbt" => [131, 139, 140, 203, 235, 251],
-      "fpt" => [245, 48, 49],
+      "fpt" => [245, 48, 49, 50],
       "smt" => [229]
     ]
   ];
@@ -127,7 +128,8 @@ class Table {
         unpack("S", substr($data, 12, 2))[1], unpack("S", substr($data, 30, 2))[1]
       ]
     ];
-    if ($this->headers["checks"][0] != 0 || $this->headers["checks"][1] != 0) {
+
+    if ($this->headers["checks"][0] != 0) {
       $this->error = true;
       $this->error_info = "Not correct DBF file by headers";
     }

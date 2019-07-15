@@ -25,11 +25,11 @@ where `$charset` only using, when charset in dbf-file not defined (default chars
 May read records of: FoxBASE, dBASE III, dBASE IV, dBASE 5, dBASE 7, FoxPro, FoxBASE+, Visual FoxPro file records. Now implements column types:
 * **C** - Character
 * **D** - Date as string in format 'YYYYMMDD' (if empty converts to null)
-* **F** - Float
+* **F** - Float (if empty converts to null)
 * **G** - General (OLE)
 * **L** - Logical ('t', 'y', 'д' - converts to 1, '?' - converts to null, all others to 0)
 * **M** - Memo 
-* **N** - Numeric
+* **N** - Numeric (if empty converts to null)
 * **P** - Picture
 * **T** - DateTime as string in format 'YYYYMMDDHHIISS' (if empty converts to null)
 * **I** - Integer

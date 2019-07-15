@@ -54,7 +54,7 @@ class Records {
       switch($column["type"]) {
         case "F":
         case "N":
-          $record[$column["name"]] = (is_numeric($sub_data)) ? (($column["decimal"]) ? (float) $sub_data : (int) $sub_data) : 0;
+          $record[$column["name"]] = (is_numeric($sub_data)) ? (($column["decimal"]) ? (float) $sub_data : (int) $sub_data) : null;
           break;
         case "Y":
           $decimal = intval(str_pad("1", $column["decimal"] + 1, "0"));

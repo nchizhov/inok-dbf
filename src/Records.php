@@ -70,7 +70,7 @@ class Records {
           $record[$column["name"]] = empty($sub_data) ? null : $sub_data;
           break;
         case "L":
-          $record[$column["name"]] =  ($sub_data == "?") ? null : (in_array(strtolower($sub_data), $this->logicals));
+          $record[$column["name"]] =  ($sub_data == "?" || empty($sub_data)) ? null : (in_array(strtolower($sub_data), $this->logicals));
           break;
         case "C":
           $record[$column["name"]] = $this->convertChar($sub_data);

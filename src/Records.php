@@ -16,6 +16,7 @@ class Records {
   private $v_fox = false;
   private $nullFlagColumns = [];
   private $logicals = ['t', 'y', 'д'];
+  private $notTrimTypes = ["M", "P", "G", "I", "Y", "T", "0"];
 
   public function __construct($data, $encode = "utf-8", $headers = null, $columns = null) {
     if ($data instanceof Table) {
@@ -50,7 +51,7 @@ class Records {
     $record["deleted"] = (unpack("C", $data[0])[1] == 42);
     $pos = 1;
     foreach ($this->columns as $column) {
-      $sub_data = (in_array($column["type"], ["M", "P", "G", "I", "Y", "0"])) ? substr($data, $pos, $column["length"]) : trim(substr($data, $pos, $column["length"]));
+      $sub_data = (in_array($column["type"], $this->notTrimTypes)) ? substr($data, $pos, $column["length"]) : trim(substr($data, $pos, $column["length"]));
       switch($column["type"]) {
         case "F":
         case "N":
@@ -64,7 +65,7 @@ class Records {
           $record[$column["name"]] = unpack("l", $sub_data)[1];
           break;
         case "T":
-          $record[$column["name"]] = (empty($sub_data)) ? null : $this->getDateTime($sub_data);
+          $record[$column["name"]] = $this->getDateTime($sub_data);
           break;
         case "D":
           $record[$column["name"]] = empty($sub_data) ? null : $sub_data;
@@ -118,6 +119,9 @@ class Records {
   }
 
   private function getDateTime($data) {
+    if (empty(trim($data))) {
+      return null;
+    }
     $dateData = unpack("L", substr($data, 0, 4))[1];
     $timeData = unpack("L", substr($data, 4, 4))[1];
     return gmdate("YmdHis", jdtounix($dateData) + intval($timeData / 1000));

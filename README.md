@@ -1,5 +1,10 @@
 ## DBF-file Reader Class
 
+[![License](https://poser.pugx.org/inok/dbf/license)](https://packagist.org/packages/inok/dbf)
+[![License](https://poser.pugx.org/inok/dbf/v/stable)](https://packagist.org/packages/inok/dbf)
+[![License](https://poser.pugx.org/inok/dbf/d/monthly)](https://packagist.org/packages/inok/dbf)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nchizhov/inok-dbf/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/nchizhov/inok-dbf/?branch=master)
+
 ### Description
 This group of classes (**Table**, **Records**, **Memo** in namespace **Inok\Dbf**) needs for reading DBF-files (structure, records) with/without MEMO-fields.
 
@@ -103,4 +108,5 @@ $memo = new \Inok\Dbf\Memo(/path/to/dbf/memo/file);
 * **text** - text of MEMO-record
 
 ### License
-MIT 
+
+This package is released under the __MIT license__. 

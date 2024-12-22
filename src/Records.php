@@ -3,10 +3,12 @@
  * DBF-file records Reader
  *
  * Author: Chizhov Nikolay <admin@kgd.in>
- * (c) 2019 CIOB "Inok"
+ * (c) 2019-2024 CIOB "Inok"
  ********************************************/
 
 namespace Inok\Dbf;
+
+use Exception;
 
 class Records {
   private $fp, $headers, $columns, $memo, $encode;
@@ -18,6 +20,9 @@ class Records {
   private $logicals = ['t', 'y', 'д'];
   private $notTrimTypes = ["M", "P", "G", "I", "Y", "T", "0"];
 
+  /**
+   * @throws Exception
+   */
   public function __construct($data, $encode = "utf-8", $headers = null, $columns = null) {
     if ($data instanceof Table) {
       $this->headers = $data->getHeaders();
@@ -26,7 +31,7 @@ class Records {
     }
     else {
       if (is_null($headers) || is_null($columns)) {
-        throw new \Exception('Not correct data in Record class');
+        throw new Exception('Not correct data in Record class');
       }
       $this->fp = $data;
       $this->headers = $headers;
@@ -64,6 +69,7 @@ class Records {
         case "I":
           $record[$column["name"]] = unpack("l", $sub_data)[1];
           break;
+        case "@":
         case "T":
           $record[$column["name"]] = $this->getDateTime($sub_data);
           break;
@@ -119,8 +125,12 @@ class Records {
   }
 
   private function getDateTime($data) {
-    if (empty(trim($data))) {
+    $data = trim($data);
+    if (empty($data)) {
       return null;
+    }
+    if (strlen($data) == 14) {
+      return $data;
     }
     $dateData = unpack("L", substr($data, 0, 4))[1];
     $timeData = unpack("L", substr($data, 4, 4))[1];

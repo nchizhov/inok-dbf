@@ -2,15 +2,15 @@
   "name": "inok/dbf",
   "description": "Package for reading DBASE-files (FoxPro) with/without MEMO-fields",
   "keywords": ["dbf", "memo", "foxpro", "dbase"],
-  "homepage": "http://blog.kgd.in",
+  "homepage": "https://blog.kgd.in",
   "type": "library",
   "license": "MIT",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "authors": [
     {
       "name": "Chizhov Nikolay",
       "email": "admin@kgd.in",
-      "homepage": "http://blog.kgd.in",
+      "homepage": "https://blog.kgd.in",
       "role": "System Administrator"
     }
   ],

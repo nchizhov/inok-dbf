@@ -13,7 +13,7 @@ This group of classes (**Table**, **Records**, **Memo** in namespace **Inok\Dbf*
 May read headers of: FoxBASE, dBASE III, dBASE IV, dBASE 5, dBASE 7 (*partial*), FoxPro, FoxBASE+, Visual FoxPro file structure.
 
 ##### Using: 
-```
+```php
 $table = new \Inok\Dbf\Table(/path/to/dbf/file, $charset);
 ```
 where `$charset` only using, when charset in dbf-file not defined (default charset: **866**)
@@ -37,12 +37,28 @@ May read records of: FoxBASE, dBASE III, dBASE IV, dBASE 5, dBASE 7, FoxPro, Fox
 * **N** - Numeric (if empty converts to null)
 * **P** - Picture
 * **T** - DateTime as string in format 'YYYYMMDDHHIISS' (if empty converts to null)
+* **@** - DateTime as string in format 'YYYYMMDDHHIISS' (if empty converts to null)
 * **I** - Integer
 * **Y** - Currency
 * **0** - NullFlags as integer
 
+Not supported types:
+* **B**:
+  - dBase 5 (Binary) - block num in MEMO-file (10 digits, padded right with spaces). Empty value: 10 spaces
+  - Visual FoxPro (Double) - float 8-byte binary format [IEEE 754](https://ru.wikipedia.org/wiki/IEEE_754). Empty values - zero
+* **O**:
+  - dBase 7 (Double) - float 8-byte format [IEEE 754](https://ru.wikipedia.org/wiki/IEEE_754). Bytes inverse, for negative numbers - inverse all bits, for positive - sign bit only. Empty values - zero
+* **Q**:
+  - Visual FoxPro (Varbinary) - Binary data with variable data. Start part saved in DBF-file, other part with variable lenth - in MEMO-file
+* **V**:
+  - Visual FoxPro (Varchar) - String with variable length. Start part saved in DBS-file, other part with variable length - in MEMO-file.
+* **W**
+  - Visual FoxPro (Blob) - No info about format
+* **+**
+  - dBase 7 (Autoincrement) - Signed integer in binary format. Length - 4 bytes BE.
+
 ##### Using: 
-```
+```php
 $records = new \Inok\Dbf\Records($data, $encode, $headers, $columns);
 ```
 * **$data** - Instance of Table class or DBF-file resource from Inok\Dbf\Table getData()
@@ -57,7 +73,7 @@ $records = new \Inok\Dbf\Records($data, $encode, $headers, $columns);
 May read MEMO-files formats (headers and records): DBT, FPT, SMT
 
 ##### Using:
-```
+```php
 $memo = new \Inok\Dbf\Memo(/path/to/dbf/memo/file);
 ```
 

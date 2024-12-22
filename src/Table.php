@@ -3,10 +3,12 @@
  * DBF-file Structure Reader
  *
  * Author: Chizhov Nikolay <admin@kgd.in>
- * (c) 2019 CIOB "Inok"
+ * (c) 2019-2024 CIOB "Inok"
  ********************************************/
 
 namespace Inok\Dbf;
+
+use Exception;
 
 class Table {
   private $headers = null;
@@ -61,11 +63,14 @@ class Table {
   ];
   private $dbase7 = false, $v_foxpro = false;
 
+  /**
+   * @throws Exception
+   */
   public function __construct($dbPath, $charset = null){
     $this->db = $dbPath;
     if (!is_null($charset)) {
       if (!is_numeric($charset)) {
-        throw new \Exception("Set not correct charset. Allows only digits.");
+        throw new Exception("Set not correct charset. Allows only digits.");
       }
       $this->charsets[0] = $charset;
     }
@@ -76,9 +81,12 @@ class Table {
     $this->close();
   }
 
+  /**
+   * @throws Exception
+   */
   private function open() {
     if (!file_exists($this->db)) {
-      throw new \Exception(sprintf('File %s cannot be found', $this->db));
+      throw new Exception(sprintf('File %s cannot be found', $this->db));
     }
     $this->fp = fopen($this->db, "rb");
   }
@@ -132,34 +140,31 @@ class Table {
     if ($this->headers["checks"][0] != 0) {
       $this->error = true;
       $this->error_info = "Not correct DBF file by headers";
+      return;
     }
-    else {
-      $this->headers["charset_name"] = "cp".$this->charsets[$this->headers["charset"]];
+    $this->headers["charset_name"] = "cp" . $this->charsets[$this->headers["charset"]];
 
-      if (in_array("dBASE 7", $this->versions[$this->headers["version"]])) {
-        $this->dbase7 = true;
-        $this->headers["columns"] = ($this->headers["header_length"] - 68) / 48;
-      }
-      elseif (in_array("Visual FoxPro", $this->versions[$this->headers["version"]])) {
-        $this->v_foxpro = true;
-        $this->headers["memo"] = (in_array($this->headers["mdx_flag"], [2, 3, 6, 7]));
-        $this->headers["columns"] = ($this->headers["header_length"] - 296) / 32;
-      }
-      else {
-        $this->headers["columns"] = ($this->headers["header_length"] - 33) / 32;
-      }
-
-      if (!isset($this->headers["memo"])) {
-        $this->headers["memo"] = in_array($this->headers["version"], $this->memo["versions"]);
-      }
-      if ($this->headers["memo"]) {
-        $this->headers["memo_file"] = ($mfile = $this->getMemoFile($file["dirname"]."/".$file["filename"])) ? $mfile : null;
-      }
-
-      $this->headers["version_name"] =
-        implode(", ", $this->versions[$this->headers["version"]])." ".($this->headers["memo"] ? "with" : "without")." memo-fields";
-      unset($this->headers["checks"], $this->headers["header_length"]);
+    if (in_array("dBASE 7", $this->versions[$this->headers["version"]])) {
+      $this->dbase7 = true;
+      $this->headers["columns"] = ($this->headers["header_length"] - 68) / 48;
+    } elseif (in_array("Visual FoxPro", $this->versions[$this->headers["version"]])) {
+      $this->v_foxpro = true;
+      $this->headers["memo"] = (in_array($this->headers["mdx_flag"], [2, 3, 6, 7]));
+      $this->headers["columns"] = ($this->headers["header_length"] - 296) / 32;
+    } else {
+      $this->headers["columns"] = ($this->headers["header_length"] - 33) / 32;
     }
+
+    if (!isset($this->headers["memo"])) {
+      $this->headers["memo"] = in_array($this->headers["version"], $this->memo["versions"]);
+    }
+    if ($this->headers["memo"]) {
+      $this->headers["memo_file"] = ($mfile = $this->getMemoFile($file["dirname"] . "/" . $file["filename"])) ? $mfile : null;
+    }
+
+    $this->headers["version_name"] =
+      implode(", ", $this->versions[$this->headers["version"]]) . " " . ($this->headers["memo"] ? "with" : "without") . " memo-fields";
+    unset($this->headers["checks"], $this->headers["header_length"]);
   }
 
   private function readTableHeaders() {
@@ -184,7 +189,8 @@ class Table {
             "name" => strtolower(trim(substr($data, 0, 11))),
             "type" => $data[11],
             "length" => unpack("C", $data[16])[1],
-            "decimal" => unpack("C", $data[17])[1]
+            "decimal" => unpack("C", $data[17])[1],
+            "mdx_flag" => unpack("C", $data[31])[1],
           ];
           if ($this->v_foxpro) {
             $this->columns[$i]["flag"] = unpack("C", $data[18])[1];
@@ -201,8 +207,8 @@ class Table {
             $this->columns[$i]["mdx_flag"] = unpack("C", $data[31])[1];
           }
         }
-        if ($this->columns[$i] == "C") {
-          $this->columns[$i]["length"] = unpack("S", substr($data, ($this->dbase7) ? 33 : 16, 2));
+        if ($this->columns[$i]["type"] == "C") {
+          $this->columns[$i]["length"] = unpack("S", substr($data, ($this->dbase7) ? 33 : 16, 2))[1];
           $this->columns[$i]["decimal"] = 0;
         }
       }
@@ -225,19 +231,17 @@ class Table {
     foreach ($this->memo["formats"] as $format => $versions) {
       if (in_array($this->headers["version"], $versions)) {
         return $this->fileExists($file.".".$format);
-        break;
       }
     }
     return false;
   }
 
   private function fileExists($fileName) {
-
-    if(file_exists($fileName)) {
+    if (file_exists($fileName)) {
       return $fileName;
     }
 
-    // Handle case insensitive requests
+    // Handle case-insensitive requests
     $directoryName = dirname($fileName);
     $fileArray = glob($directoryName . '/*', GLOB_NOSORT);
     $fileNameLowerCase = strtolower($fileName);

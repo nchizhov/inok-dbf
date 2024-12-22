@@ -3,10 +3,12 @@
  * DBF-file MEMO-fields Reader
  *
  * Author: Chizhov Nikolay <admin@kgd.in>
- * (c) 2019 CIOB "Inok"
+ * (c) 2019-2024 CIOB "Inok"
  ********************************************/
 
 namespace Inok\Dbf;
+
+use Exception;
 
 class Memo {
   private $headers = null;
@@ -21,6 +23,9 @@ class Memo {
   private $isBase4 = false;
   private $isBase3 = false;
 
+  /**
+   * @throws Exception
+   */
   public function __construct($file) {
     $this->db = $file;
 
@@ -31,9 +36,12 @@ class Memo {
     $this->close();
   }
 
+  /**
+   * @throws Exception
+   */
   private function open() {
     if (!file_exists($this->db)) {
-      throw new \Exception(sprintf('Memo-file %s cannot be found', $this->db));
+      throw new Exception(sprintf('Memo-file %s cannot be found', $this->db));
     }
     $this->fp = fopen($this->db, "rb");
   }
@@ -75,18 +83,20 @@ class Memo {
         "freeblock_position" => unpack("L", substr($data, 0, 4))[1],
         "block_size" => 512
       ];
-    } elseif ($this->isBase4) {
+      return;
+    }
+    if ($this->isBase4) {
       $this->headers = [
         "freeblock_position" => unpack("L", substr($data, 0, 4))[1],
         "block_size" => unpack("S", substr($data, 20, 2))[1],
         "dbf-file" => $fileName
       ];
-    } else {
-      $this->headers = [
-        "freeblock_position" => unpack("N", substr($data, 0, 4))[1],
-        "block_size" => unpack("n", substr($data, 6, 2))[1]
-      ];
+      return;
     }
+    $this->headers = [
+      "freeblock_position" => unpack("N", substr($data, 0, 4))[1],
+      "block_size" => unpack("n", substr($data, 6, 2))[1]
+    ];
   }
 
   private function readMemo($block) {
@@ -97,22 +107,22 @@ class Memo {
         $text .= fread($this->fp, 512);
       }
       $memo["text"] = $this->parseDBase3($text);
-    } else {
-      $data = fread($this->fp, 8);
-      if ($this->isBase4) {
-        $memo = [
-          "signature" => $this->signature[unpack("N", substr($data, 0, 4))[1]],
-          "length" => octdec(intval(bin2hex(trim(substr($data, 4, 4)))))
-        ];
-        $memo["text"] = $this->parseDBase4(fread($this->fp, $memo["length"]));
-      } else {
-        $memo = [
-          "signature" => $this->signature[unpack("N", substr($data, 0, 4))[1]],
-          "length" => unpack("N", substr($data, 4, 4))[1]
-        ];
-        $memo["text"] = fread($this->fp, $memo["length"]);
-      }
+      return $memo;
     }
+    $data = fread($this->fp, 8);
+    if ($this->isBase4) {
+      $memo = [
+        "signature" => $this->signature[unpack("N", substr($data, 0, 4))[1]],
+        "length" => octdec(intval(bin2hex(trim(substr($data, 4, 4)))))
+      ];
+      $memo["text"] = $this->parseDBase4(fread($this->fp, $memo["length"]));
+      return $memo;
+    }
+    $memo = [
+      "signature" => $this->signature[unpack("N", substr($data, 0, 4))[1]],
+      "length" => unpack("N", substr($data, 4, 4))[1]
+    ];
+    $memo["text"] = fread($this->fp, $memo["length"]);
     return $memo;
   }
 
@@ -127,7 +137,6 @@ class Memo {
     if (preg_match('/\x0d\x0a/', $text, $matches, PREG_OFFSET_CAPTURE)) {
       $text = substr($text, 0, $matches[0][1]);
     }
-    $text = preg_replace('/\x8d\x0a/', "\n", $text);
-    return $text;
+    return preg_replace('/\x8d\x0a/', "\n", $text);
   }
 }
